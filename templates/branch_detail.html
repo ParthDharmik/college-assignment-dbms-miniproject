@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ branch.Branch_Name }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('branches') }}" style="color:#059669;">← Back</a>
+<h1>{{ branch.Branch_Name }}</h1>
+<p>{{ branch.Address }}, {{ branch.City }} — {{ branch.Bank_Name }} (IFSC: {{ branch.IFSC_Code or '—' }})</p>
+
+<h2>Employees ({{ employees|length }})</h2>
+<table>
+    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+    <tbody>
+    {% for e in employees %}
+        <tr><td>{{ e.Employee_ID }}</td><td>{{ e.Employee_Name }}</td>
+            <td>{{ e.Email or '—' }}</td><td>{{ e.Role }}</td></tr>
+    {% else %}
+        <tr><td colspan="4" style="text-align:center; color:#9ca3af;">No employees</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h2>Accounts ({{ accounts|length }})</h2>
+<table>
+    <thead><tr><th>Account</th><th>Customer</th><th>Type</th><th>Balance</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for a in accounts %}
+        <tr onclick="location.href='{{ url_for('account_detail', aid=a.Account_ID) }}'" style="cursor:pointer;">
+            <td>{{ a.Account_ID }}</td><td>{{ a.Customer_Name }}</td><td>{{ a.Account_Type }}</td>
+            <td>₹ {{ "{:,.2f}".format(a.Balance) }}</td>
+            <td><span class="badge badge-{{ a.Status|lower }}">{{ a.Status }}</span></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

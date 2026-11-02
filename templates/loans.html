@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Loans{% endblock %}
+{% block content %}
+<h1>Loans</h1>
+<form class="toolbar" method="get">
+    <select name="status">
+        <option value="">All Status</option>
+        <option value="Pending" {% if status_f=='Pending' %}selected{% endif %}>Pending</option>
+        <option value="Approved" {% if status_f=='Approved' %}selected{% endif %}>Approved</option>
+        <option value="Rejected" {% if status_f=='Rejected' %}selected{% endif %}>Rejected</option>
+    </select>
+    <button class="btn" type="submit">Filter</button>
+    <a class="btn" href="{{ url_for('loan_new') }}">+ New Loan</a>
+</form>
+<table>
+    <thead><tr><th>ID</th><th>Customer</th><th>Type</th><th>Amount</th><th>Rate</th><th>Months</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for l in loans %}
+        <tr>
+            <td>{{ l.Loan_ID }}</td><td>{{ l.Customer_Name }}</td><td>{{ l.Loan_Type }}</td>
+            <td>₹ {{ "{:,.2f}".format(l.Amount) }}</td>
+            <td>{{ l.Interest_Rate }}%</td><td>{{ l.Duration_Months }}</td>
+            <td><span class="badge badge-{{ l.Status|lower }}">{{ l.Status }}</span></td>
+            <td>
+                {% if l.Status == 'Pending' %}
+                <form method="post" action="{{ url_for('set_loan_status', loan_id=l.Loan_ID) }}" style="display:inline;">
+                    <button class="btn small" name="status" value="Approved">Approve</button>
+                    <button class="btn small danger" name="status" value="Rejected">Reject</button>
+                </form>
+                {% else %}—{% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

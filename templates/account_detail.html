@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Account {{ account.Account_ID }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('accounts') }}" style="color:#059669;">← Back</a>
+<h1>Account #{{ account.Account_ID }}</h1>
+<p>Customer: <strong>{{ account.Customer_Name }}</strong> | Branch: {{ account.Branch_Name }}</p>
+<p>Type: {{ account.Account_Type }} | Opened: {{ account.Opening_Date }} | Status: <span class="badge badge-{{ account.Status|lower }}">{{ account.Status }}</span></p>
+
+<div class="balance-box">
+    <div>Current Balance</div>
+    <div class="balance">₹ {{ "{:,.2f}".format(account.Balance) }}</div>
+</div>
+
+<h2>Recent Transactions</h2>
+<table>
+    <thead><tr><th>ID</th><th>Date</th><th>Type</th><th>Amount</th></tr></thead>
+    <tbody>
+    {% for t in transactions %}
+        <tr>
+            <td>{{ t.Transaction_ID }}</td><td>{{ t.Transaction_Date }}</td>
+            <td class="{{ 'credit' if t.Transaction_Type == 'Deposit' else 'debit' }}">{{ t.Transaction_Type }}</td>
+            <td class="{{ 'credit' if t.Transaction_Type == 'Deposit' else 'debit' }}">
+                {{ '+' if t.Transaction_Type == 'Deposit' else '-' }} ₹ {{ "{:,.2f}".format(t.Amount) }}
+            </td>
+        </tr>
+    {% else %}
+        <tr><td colspan="4" style="text-align:center; color:#9ca3af;">No transactions</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

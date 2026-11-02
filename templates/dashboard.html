@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Bank Dashboard</h1>
+
+<div class="cards">
+    <div class="card"><div class="label">Banks</div><div class="value">{{ counts.banks }}</div></div>
+    <div class="card"><div class="label">Branches</div><div class="value">{{ counts.branches }}</div></div>
+    <div class="card"><div class="label">Customers</div><div class="value">{{ counts.customers }}</div></div>
+    <div class="card"><div class="label">Accounts</div><div class="value">{{ counts.accounts }}</div></div>
+    <div class="card"><div class="label">Loans</div><div class="value">{{ counts.loans }}</div></div>
+    <div class="card"><div class="label">Transactions</div><div class="value">{{ counts.transactions }}</div></div>
+</div>
+
+<div class="cards">
+    <div class="card"><div class="label">Total Deposits</div><div class="value">₹ {{ "{:,.0f}".format(totals.deposits) }}</div></div>
+    <div class="card"><div class="label">Total Loans</div><div class="value">₹ {{ "{:,.0f}".format(totals.loans) }}</div></div>
+</div>
+
+<div class="grid-2" style="margin-bottom:24px;">
+    <div class="chart-box"><h2 style="margin-top:0;">Loan Mix</h2><div class="chart-wrap"><canvas id="loanChart"></canvas></div></div>
+    <div class="chart-box"><h2 style="margin-top:0;">30-Day Transactions</h2><div class="chart-wrap"><canvas id="txnChart"></canvas></div></div>
+</div>
+
+<h2>Accounts by Branch</h2>
+<table>
+    <thead><tr><th>Branch</th><th>City</th><th>Accounts</th><th>Total Balance</th></tr></thead>
+    <tbody>
+    {% for b in by_branch %}
+        <tr>
+            <td>{{ b.Branch_Name }}</td>
+            <td>{{ b.City }}</td>
+            <td>{{ b.accounts }}</td>
+            <td>₹ {{ "{:,.2f}".format(b.total_balance) }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="grid-2" style="margin-top:24px;">
+    <div>
+        <h2>Top Customers</h2>
+        <table>
+            <thead><tr><th>Customer</th><th>Accounts</th><th>Balance</th></tr></thead>
+            <tbody>
+            {% for c in top_customers %}
+                <tr><td>{{ c.Customer_Name }}</td><td>{{ c.accounts }}</td><td>₹ {{ "{:,.2f}".format(c.total_balance) }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <h2>Recent Activity</h2>
+        <ul class="activity">
+            {% for r in recent %}
+            <li><strong>{{ r.Actor }}</strong> — {{ r.Action }}<br><span class="time">{{ r.Created_At }}</span></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<script>
+const loanMix = {{ loan_mix|tojson }};
+new Chart(document.getElementById('loanChart'), {
+    type: 'doughnut',
+    data: {
+        labels: loanMix.map(x => x.label),
+        datasets: [{ data: loanMix.map(x => x.total), backgroundColor: ['#10b981','#059669','#047857','#34d399','#6ee7b7'] }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+});
+const series = {{ txn_series|tojson }};
+new Chart(document.getElementById('txnChart'), {
+    type: 'line',
+    data: {
+        labels: series.map(x => x.d),
+        datasets: [
+            { label: 'Deposits', data: series.map(x => x.deposits), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.3 },
+            { label: 'Withdrawals', data: series.map(x => x.withdrawals), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', fill: true, tension: 0.3 }
+        ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+});
+</script>
+{% endblock %}

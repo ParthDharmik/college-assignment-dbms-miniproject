@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"><title>Employee Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head><body>
+<div class="container" style="max-width:380px;">
+    <h1>Employee Login</h1>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}<div class="flash-error">{{ messages[0] }}</div>{% endif %}
+    {% endwith %}
+    <form method="post">
+        <label>Employee ID</label>
+        <input type="text" name="id" required autofocus>
+        <label>Password</label>
+        <input type="password" name="password" required>
+        <button class="btn" style="width:100%;">Sign In</button>
+    </form>
+    <p style="text-align:center; margin-top:20px;"><a href="{{ url_for('index') }}" style="color:#059669;">← Back</a></p>
+</div>
+</body></html>

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Transactions{% endblock %}
+{% block content %}
+<h1>Transactions</h1>
+<div class="toolbar">
+    <form method="get" style="display:flex; gap:10px; flex:1; flex-wrap:wrap;">
+        <select name="type">
+            <option value="">All Types</option>
+            <option value="Deposit" {% if type_f=='Deposit' %}selected{% endif %}>Deposit</option>
+            <option value="Withdraw" {% if type_f=='Withdraw' %}selected{% endif %}>Withdraw</option>
+        </select>
+        <button class="btn" type="submit">Filter</button>
+    </form>
+    <a class="btn" href="{{ url_for('transactions_export') }}">⬇ Export CSV</a>
+</div>
+
+<table>
+    <thead><tr><th>ID</th><th>Date</th><th>Type</th><th>Amount</th><th>Account</th><th>Customer</th></tr></thead>
+    <tbody>
+    {% for t in transactions %}
+        <tr>
+            <td>{{ t.Transaction_ID }}</td><td>{{ t.Transaction_Date }}</td>
+            <td class="{{ 'credit' if t.Transaction_Type == 'Deposit' else 'debit' }}">{{ t.Transaction_Type }}</td>
+            <td class="{{ 'credit' if t.Transaction_Type == 'Deposit' else 'debit' }}">
+                {{ '+' if t.Transaction_Type == 'Deposit' else '−' }} ₹ {{ "{:,.2f}".format(t.Amount) }}
+            </td>
+            <td>{{ t.Account_ID }}</td><td>{{ t.Customer_Name }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}New Customer{% endblock %}
+{% block content %}
+<a href="{{ url_for('customers') }}" style="color:#059669;">← Back to Customers</a>
+<h1>New Customer</h1>
+<form method="post">
+    <label>Full Name *</label><input name="name" required>
+    <label>Phone</label><input name="phone">
+    <label>Email</label><input name="email" type="email">
+    <label>Address</label><input name="address">
+    <label>Date of Birth</label><input name="dob" type="date">
+    <button class="btn">Create Customer</button>
+    <p style="margin-top:12px; font-size:13px; color:#6b7280;">Default password: <code>password</code></p>
+</form>
+{% endblock %}

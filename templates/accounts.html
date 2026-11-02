@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Accounts{% endblock %}
+{% block content %}
+<h1>Accounts</h1>
+<form class="toolbar" method="get">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search customer or account ID...">
+    <select name="type">
+        <option value="">All Types</option>
+        <option value="Savings" {% if type_f=='Savings' %}selected{% endif %}>Savings</option>
+        <option value="Current" {% if type_f=='Current' %}selected{% endif %}>Current</option>
+        <option value="Fixed" {% if type_f=='Fixed' %}selected{% endif %}>Fixed</option>
+    </select>
+    <button class="btn" type="submit">Filter</button>
+    <a class="btn" href="{{ url_for('account_new') }}">+ New Account</a>
+</form>
+<table>
+    <thead><tr><th>Account ID</th><th>Customer</th><th>Branch</th><th>Type</th><th>Balance</th><th>Opened</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for a in accounts %}
+        <tr onclick="location.href='{{ url_for('account_detail', aid=a.Account_ID) }}'" style="cursor:pointer;">
+            <td>{{ a.Account_ID }}</td><td>{{ a.Customer_Name }}</td><td>{{ a.Branch_Name }}</td>
+            <td>{{ a.Account_Type }}</td>
+            <td>₹ {{ "{:,.2f}".format(a.Balance) }}</td><td>{{ a.Opening_Date }}</td>
+            <td><span class="badge badge-{{ a.Status|lower }}">{{ a.Status }}</span></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

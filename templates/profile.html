@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+<h1>My Profile</h1>
+<div class="cards">
+    <div class="card"><div class="label">Employee ID</div><div class="value">{{ emp.Employee_ID }}</div></div>
+    <div class="card"><div class="label">Role</div><div class="value">{{ emp.Role }}</div></div>
+</div>
+<p><strong>Name:</strong> {{ emp.Employee_Name }}</p>
+<p><strong>Email:</strong> {{ emp.Email or '—' }}</p>
+<p><strong>Branch:</strong> {{ emp.Branch_Name or '—' }}</p>
+
+<h2>Recent Activity</h2>
+<ul class="activity">
+    {% for r in logs %}
+    <li><strong>{{ r.Action }}</strong><br><span class="time">{{ r.Created_At }}</span></li>
+    {% else %}
+    <li style="color:#9ca3af;">No activity</li>
+    {% endfor %}
+</ul>
+{% endblock %}

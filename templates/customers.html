@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Customers{% endblock %}
+{% block content %}
+<h1>Customers</h1>
+<form class="toolbar" method="get">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search name, phone, email...">
+    <button class="btn" type="submit">Search</button>
+    <a class="btn" href="{{ url_for('customer_new') }}">+ New Customer</a>
+</form>
+<table>
+    <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Accounts</th><th>Balance</th><th>Loans</th></tr></thead>
+    <tbody>
+    {% for c in customers %}
+        <tr onclick="location.href='{{ url_for('customer_detail', cid=c.Customer_ID) }}'" style="cursor:pointer;">
+            <td>{{ c.Customer_ID }}</td>
+            <td>{{ c.Customer_Name }}</td>
+            <td>{{ c.Phone_No or '—' }}</td>
+            <td>{{ c.Email or '—' }}</td>
+            <td>{{ c.accounts }}</td>
+            <td>₹ {{ "{:,.2f}".format(c.total_balance) }}</td>
+            <td>{{ c.loans }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

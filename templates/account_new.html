@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}New Account{% endblock %}
+{% block content %}
+<a href="{{ url_for('accounts') }}" style="color:#059669;">← Back</a>
+<h1>New Account</h1>
+<form method="post">
+    <label>Customer *</label>
+    <select name="customer_id" required>
+        {% for c in customers %}<option value="{{ c.Customer_ID }}">{{ c.Customer_Name }} (#{{ c.Customer_ID }})</option>{% endfor %}
+    </select>
+    <label>Branch *</label>
+    <select name="branch_id" required>
+        {% for b in branches %}<option value="{{ b.Branch_ID }}">{{ b.Branch_Name }} — {{ b.City }}</option>{% endfor %}
+    </select>
+    <label>Account Type *</label>
+    <select name="account_type" required>
+        <option>Savings</option><option>Current</option><option>Fixed</option>
+    </select>
+    <label>Initial Balance (₹)</label>
+    <input name="balance" type="number" step="0.01" min="0" value="0">
+    <button class="btn">Create Account</button>
+</form>
+{% endblock %}

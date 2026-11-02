@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Branches{% endblock %}
+{% block content %}
+<h1>Branches</h1>
+<table>
+    <thead><tr><th>ID</th><th>Name</th><th>Bank</th><th>City</th><th>IFSC</th><th>Employees</th><th>Accounts</th><th>Deposits</th></tr></thead>
+    <tbody>
+    {% for b in branches %}
+        <tr onclick="location.href='{{ url_for('branch_detail', bid=b.Branch_ID) }}'" style="cursor:pointer;">
+            <td>{{ b.Branch_ID }}</td><td>{{ b.Branch_Name }}</td><td>{{ b.Bank_Name }}</td>
+            <td>{{ b.City }}</td><td>{{ b.IFSC_Code or '—' }}</td>
+            <td>{{ b.employees }}</td><td>{{ b.accounts }}</td>
+            <td>₹ {{ "{:,.2f}".format(b.total_deposits) }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h2>Banks</h2>
+<table>
+    <thead><tr><th>ID</th><th>Name</th><th>Head Office</th><th>Contact</th><th>Email</th></tr></thead>
+    <tbody>
+    {% for b in banks %}
+        <tr><td>{{ b.Bank_ID }}</td><td>{{ b.Bank_Name }}</td><td>{{ b.Head_Office }}</td>
+            <td>{{ b.Contact_No }}</td><td>{{ b.Email }}</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h2>Employees</h2>
+<table>
+    <thead><tr><th>ID</th><th>Name</th><th>Role</th><th>Branch</th></tr></thead>
+    <tbody>
+    {% for e in employees %}
+        <tr><td>{{ e.Employee_ID }}</td><td>{{ e.Employee_Name }}</td>
+            <td>{{ e.Role }}</td><td>{{ e.Branch_Name }}</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard{% endblock %}
+{% block content %}
+
+<style>
+    .tabs {
+        display: flex; gap: 6px; margin-bottom: 24px; padding: 6px;
+        background: #f3f4f6; border-radius: 12px; overflow-x: auto;
+    }
+    .tab-btn {
+        flex: 1; padding: 12px 20px; background: transparent; border: none;
+        border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+        color: #6b7280; transition: all 0.2s ease; font-family: inherit;
+        white-space: nowrap;
+    }
+    .tab-btn:hover { color: #047857; }
+    .tab-btn.active {
+        background: white; color: #047857;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .emi-preview {
+        margin-top: 16px; padding: 16px 20px; border-radius: 12px;
+        background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+        border: 1px solid #a7f3d0;
+    }
+    .emi-preview .row {
+        display: flex; justify-content: space-between;
+        font-size: 14px; padding: 6px 0;
+    }
+    .emi-preview .row span:first-child { color: #065f46; }
+    .emi-preview .row span:last-child { font-weight: 700; color: #047857; }
+    .emi-preview .big {
+        font-size: 22px; font-weight: 800; color: #047857;
+        margin-top: 8px; text-align: center;
+        border-top: 1px dashed #a7f3d0; padding-top: 12px;
+    }
+    .loan-form-grid {
+        display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;
+    }
+    @media (max-width: 640px) {
+        .loan-form-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<h1>Welcome, {{ account.Customer_Name }}</h1>
+
+<div class="balance-box">
+    <div>Account {{ account.Account_ID }} — {{ account.Account_Type }}</div>
+    <div class="balance">₹ {{ "{:,.2f}".format(account.Balance) }}</div>
+    <div style="font-size:13px; opacity:0.9;">
+        {{ account.Branch_Name }} · Opened {{ account.Opening_Date }} ·
+        <span class="badge badge-{{ account.Status|lower }}">{{ account.Status }}</span>
+    </div>
+</div>
+
+<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-money', this)">💸 Money</button>
+    <button class="tab-btn" onclick="switchTab('tab-loans', this)">🏦 Loans</button>
+    <button class="tab-btn" onclick="switchTab('tab-history', this)">📜 History</button>
+</div>
+
+<!-- ============ TAB: MONEY ============ -->
+<div id="tab-money" class="tab-panel">
+    <div class="grid-2">
+        <div>
+            <h2>Deposit</h2>
+            <form method="post">
+                <input type="hidden" name="action" value="deposit">
+                <label>Amount (₹)</label>
+                <input type="number" name="amount" step="0.01" min="0.01" required>
+                <button class="btn" style="width:100%;">Deposit</button>
+            </form>
+
+            <h2>Withdraw</h2>
+            <form method="post">
+                <input type="hidden" name="action" value="withdraw">
+                <label>Amount (₹)</label>
+                <input type="number" name="amount" step="0.01" min="0.01" required>
+                <button class="btn danger" style="width:100%;">Withdraw</button>
+            </form>
+
+            <h2>Send Money</h2>
+            <form method="post">
+                <input type="hidden" name="action" value="transfer">
+                <label>Recipient Account #</label>
+                <input name="account_number" required>
+                <label>Amount (₹)</label>
+                <input type="number" name="amount" step="0.01" min="0.01" required>
+                <button class="btn" style="width:100%;">Send</button>
+            </form>
+        </div>
+
+        <div class="chart-box">
+            <h2 style="margin-top:0;">14-Day Activity</h2>
+            <div class="chart-wrap"><canvas id="myChart"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ TAB: LOANS ============ -->
+<div id="tab-loans" class="tab-panel" style="display:none;">
+    <div class="grid-2" style="align-items:flex-start;">
+        <div>
+            <h2 style="margin-top:0;">Apply for a Loan</h2>
+            <p style="font-size:14px; margin-bottom:16px;">
+                Submit a request and our team will review it. You'll see the
+                status update on the right as soon as it's processed.
+            </p>
+            <form method="post" id="loanForm">
+                <input type="hidden" name="action" value="request_loan">
+
+                <label>Loan Type</label>
+                <select name="loan_type" required>
+                    <option value="Home">🏠 Home</option>
+                    <option value="Car">🚗 Car</option>
+                    <option value="Personal">👤 Personal</option>
+                    <option value="Education">🎓 Education</option>
+                    <option value="Business">💼 Business</option>
+                </select>
+
+                <div class="loan-form-grid">
+                    <div>
+                        <label>Amount (₹)</label>
+                        <input type="number" name="loan_amount" id="loanAmount"
+                               step="1000" min="1000" value="100000" required>
+                    </div>
+                    <div>
+                        <label>Rate (%)</label>
+                        <input type="number" name="loan_rate" id="loanRate"
+                               step="0.1" min="0" value="8.5" required>
+                    </div>
+                    <div>
+                        <label>Tenure (months)</label>
+                        <input type="number" name="loan_months" id="loanMonths"
+                               step="1" min="1" value="12" required>
+                    </div>
+                </div>
+
+                <div class="emi-preview">
+                    <div class="row"><span>Loan Amount</span><span id="emiAmount">₹ 0</span></div>
+                    <div class="row"><span>Total Interest</span><span id="emiInterest">₹ 0</span></div>
+                    <div class="row"><span>Total Payable</span><span id="emiTotal">₹ 0</span></div>
+                    <div class="big">Monthly EMI: <span id="emiMonthly">₹ 0</span></div>
+                </div>
+
+                <button class="btn" style="width:100%;">Submit Loan Request</button>
+            </form>
+        </div>
+
+        <div>
+            <h2 style="margin-top:0;">My Loan Applications</h2>
+            {% if loans %}
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Type</th><th>Amount</th><th>Rate</th><th>Tenure</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                {% for l in loans %}
+                    <tr>
+                        <td>#{{ l.Loan_ID }}</td>
+                        <td>{{ l.Loan_Type }}</td>
+                        <td>₹ {{ "{:,.2f}".format(l.Amount) }}</td>
+                        <td>{{ l.Interest_Rate }}%</td>
+                        <td>{{ l.Duration_Months }} mo</td>
+                        <td><span class="badge badge-{{ l.Status|lower }}">{{ l.Status }}</span></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="padding:40px; text-align:center; color:#9ca3af; background:#f9fafb; border-radius:12px;">
+                No loan applications yet.<br>
+                <span style="font-size:13px;">Submit your first request using the form on the left.</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ============ TAB: HISTORY ============ -->
+<div id="tab-history" class="tab-panel" style="display:none;">
+    <h2 style="margin-top:0;">Recent Transactions</h2>
+    <table>
+        <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Reference</th></tr></thead>
+        <tbody>
+        {% for t in transactions %}
+            <tr>
+                <td>{{ t.Transaction_Date }}</td>
+                <td class="{{ 'credit' if t.Transaction_Type == 'Deposit' else 'debit' }}">{{ t.Transaction_Type }}</td>
+                <td class="{{ 'credit' if t.Transaction_Type == 'Deposit' else 'debit' }}">
+                    {{ '+' if t.Transaction_Type == 'Deposit' else '-' }} ₹ {{ "{:,.2f}".format(t.Amount) }}
+                </td>
+                <td style="color:#6b7280;">TXN-{{ '%06d' % t.Transaction_ID }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4" style="text-align:center; color:#9ca3af; padding:40px;">No transactions yet</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="{{ url_for('logout') }}" class="btn danger" style="margin-top:24px;">Logout</a>
+
+<script>
+const series = {{ series|tojson }};
+new Chart(document.getElementById('myChart'), {
+    type: 'bar',
+    data: {
+        labels: series.map(x => x.d),
+        datasets: [
+            { label: 'Deposits', data: series.map(x => x.deposits), backgroundColor: '#10b981', borderRadius: 6 },
+            { label: 'Withdrawals', data: series.map(x => x.withdrawals), backgroundColor: '#ef4444', borderRadius: 6 }
+        ]
+    },
+    options: {
+        plugins: { legend: { position: 'bottom' } },
+        scales: { y: { beginAtZero: true } },
+        responsive: true, maintainAspectRatio: false
+    }
+});
+
+function switchTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).style.display = '';
+    btn.classList.add('active');
+}
+
+const fmt = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 });
+function updateEMI() {
+    const P = parseFloat(document.getElementById('loanAmount').value) || 0;
+    const annualRate = parseFloat(document.getElementById('loanRate').value) || 0;
+    const n = parseInt(document.getElementById('loanMonths').value) || 1;
+    const r = annualRate / 12 / 100;
+    let emi = 0;
+    if (r === 0) emi = P / n;
+    else emi = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    const total = emi * n;
+    const interest = total - P;
+    document.getElementById('emiAmount').textContent   = '₹ ' + fmt.format(P);
+    document.getElementById('emiInterest').textContent = '₹ ' + fmt.format(interest);
+    document.getElementById('emiTotal').textContent    = '₹ ' + fmt.format(total);
+    document.getElementById('emiMonthly').textContent  = '₹ ' + fmt.format(emi);
+}
+['loanAmount','loanRate','loanMonths'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateEMI);
+});
+updateEMI();
+</script>
+{% endblock %}

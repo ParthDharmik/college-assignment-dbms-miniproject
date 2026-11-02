@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ customer.Customer_Name }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('customers') }}" style="color:#059669;">← Back</a>
+<h1>{{ customer.Customer_Name }}</h1>
+<p>ID: {{ customer.Customer_ID }} | Phone: {{ customer.Phone_No or '—' }} | Email: {{ customer.Email or '—' }}</p>
+<p>Address: {{ customer.Address or '—' }} | DOB: {{ customer.DOB or '—' }}</p>
+
+<h2>Accounts</h2>
+<table>
+    <thead><tr><th>ID</th><th>Branch</th><th>Type</th><th>Balance</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for a in accounts %}
+        <tr onclick="location.href='{{ url_for('account_detail', aid=a.Account_ID) }}'" style="cursor:pointer;">
+            <td>{{ a.Account_ID }}</td><td>{{ a.Branch_Name }}</td><td>{{ a.Account_Type }}</td>
+            <td>₹ {{ "{:,.2f}".format(a.Balance) }}</td>
+            <td><span class="badge badge-{{ a.Status|lower }}">{{ a.Status }}</span></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h2>Loans</h2>
+<table>
+    <thead><tr><th>ID</th><th>Type</th><th>Amount</th><th>Rate</th><th>Months</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for l in loans %}
+        <tr>
+            <td>{{ l.Loan_ID }}</td><td>{{ l.Loan_Type }}</td>
+            <td>₹ {{ "{:,.2f}".format(l.Amount) }}</td>
+            <td>{{ l.Interest_Rate }}%</td><td>{{ l.Duration_Months }}</td>
+            <td><span class="badge badge-{{ l.Status|lower }}">{{ l.Status }}</span></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h2>Recent Transactions</h2>
+<table>
+    <thead><tr><th>ID</th><th>Date</th><th>Type</th><th>Amount</th><th>Account</th></tr></thead>
+    <tbody>
+    {% for t in transactions %}
+        <tr>
+            <td>{{ t.Transaction_ID }}</td><td>{{ t.Transaction_Date }}</td>
+            <td class="{{ 'credit' if t.Transaction_Type == 'Deposit' else 'debit' }}">{{ t.Transaction_Type }}</td>
+            <td class="{{ 'credit' if t.Transaction_Type == 'Deposit' else 'debit' }}">
+                {{ '+' if t.Transaction_Type == 'Deposit' else '-' }} ₹ {{ "{:,.2f}".format(t.Amount) }}
+            </td>
+            <td>{{ t.Account_ID }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
